@@ -1,0 +1,24 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- Tailwind CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <title>{% block title %}My App{% endblock %}</title>
+          <style>
+            [v-cloak] { display: none; }
+            </style>
+        {% block css %}{% endblock %}
+    </head>
+    <body>
+        {{ data|json_script:"test-data" }}
+        {% block content %}{% endblock %}
+
+        <!-- Vue -->
+        <script src="{% static '/js/vue.global.prod.js' %}"></script>
+
+        {% block js %}{% endblock %}
+    </body>
+</html>
