@@ -1,0 +1,101 @@
+# =====================
+# Python / Django
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# Django
+*.log
+*.pot
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Django static collected files
+staticfiles/
+static_root/
+
+# Migrations (optional — some teams commit these)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# =====================
+# Environment Variables
+# =====================
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+!.env.example
+
+# =====================
+# Node / Vue / JS
+# =====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn
+
+# Build output
+dist/
+build/
+static/js/app.js        # esbuild output
+static/js/*.min.js      # minified files
+
+# Keep the local vue file we copied
+!static/js/vue.global.prod.js
+
+# esbuild
+.esbuild/
+
+# =====================
+# IDE / Editors
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# =====================
+# Testing
+# =====================
+.coverage
+coverage/
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# =====================
+# Deployment
+# =====================
+.heroku/
+Procfile.local
+*.pid
+gunicorn.pid
+
+# Whitenoise hashed files
+staticfiles/
