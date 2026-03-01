@@ -7,14 +7,15 @@
         <!-- Tailwind CDN -->
         <script src="https://cdn.tailwindcss.com"></script>
         <title>{% block title %}My App{% endblock %}</title>
-          <style>
-            [v-cloak] { display: none; }
-            </style>
-        {% block css %}{% endblock %}
+        <style>
+            [v-cloak] {
+                display: none;
+            }
+        </style>
+        {% block extra_css %}{% endblock %}
     </head>
     <body>
-        {{ data|json_script:"test-data" }}
-        {% block content %}{% endblock %}
+        {{ data|json_script:"data" }} {% block content %}{% endblock %}
 
         <!-- Vue -->
         <script src="{% static '/js/vue.global.prod.js' %}"></script>

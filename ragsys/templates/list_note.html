@@ -1,0 +1,1542 @@
+{% extends 'base.html' %} {% load static %} {% block title %}My Notes {%endblock %} {% block extra_css %}
+<link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet"
+/>
+<style>
+    :root {
+        --blue: #1a73e8;
+        --blue-dk: #1557b0;
+        --blue-lt: #e8f0fe;
+        --green: #34a853;
+        --red: #ea4335;
+        --red-lt: #fce8e6;
+        --yellow: #fbbc04;
+        --border: #dadce0;
+        --surface: #ffffff;
+        --bg: #f0f4f9;
+        --text: #202124;
+        --text-2: #5f6368;
+        --text-3: #9aa0a6;
+        --nav-h: 64px;
+        --sh1:
+            0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px rgba(60, 64, 67, 0.15);
+        --sh2:
+            0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px rgba(60, 64, 67, 0.15);
+        --sh3:
+            0 2px 6px rgba(60, 64, 67, 0.3), 0 6px 16px rgba(60, 64, 67, 0.15);
+        --chat-w: 360px;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        background: var(--bg);
+        font-family: "Roboto", system-ui, sans-serif;
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+    }
+    [v-cloak] {
+        display: none;
+    }
+
+    /* ── Top Nav ── */
+    .gd-nav {
+        position: sticky;
+        top: 0;
+        z-index: 200;
+        height: var(--nav-h);
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        box-shadow: var(--sh1);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 16px;
+    }
+    .gd-nav__brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+    .gd-nav__brand-icon {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+    }
+    .gd-nav__brand-name {
+        font-family: "Google Sans", sans-serif;
+        font-size: 22px;
+        font-weight: 400;
+        color: var(--text-2);
+        letter-spacing: -0.2px;
+    }
+    .gd-nav__brand-name span {
+        color: var(--text);
+    }
+    .gd-nav__search {
+        flex: 1;
+        max-width: 720px;
+        position: relative;
+    }
+    .gd-nav__search svg {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-2);
+        pointer-events: none;
+    }
+    .gd-nav__search input {
+        width: 100%;
+        height: 46px;
+        padding: 0 16px 0 44px;
+        background: var(--bg);
+        border: 2px solid transparent;
+        border-radius: 24px;
+        font-size: 16px;
+        font-family: "Roboto", sans-serif;
+        color: var(--text);
+        outline: none;
+        transition:
+            background 0.2s,
+            border-color 0.2s,
+            box-shadow 0.2s;
+    }
+    .gd-nav__search input:focus {
+        background: var(--surface);
+        border-color: transparent;
+        box-shadow: var(--sh2);
+    }
+    .gd-nav__search input::placeholder {
+        color: var(--text-3);
+        font-size: 15px;
+    }
+    .gd-nav__right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .gd-icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-2);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition:
+            background 0.15s,
+            color 0.15s;
+        text-decoration: none;
+    }
+    .gd-icon-btn:hover {
+        background: var(--blue-lt);
+        color: var(--blue);
+    }
+
+    /* ── Page layout with chat sidebar ── */
+    .gd-layout {
+        display: flex;
+        height: calc(100vh - var(--nav-h));
+        overflow: hidden;
+    }
+
+    .gd-content {
+        flex: 1;
+        overflow-y: auto;
+        transition: margin-right 0.3s ease;
+    }
+
+    /* ── Main ── */
+    .gd-main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 24px 80px;
+    }
+    .gd-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        gap: 12px;
+    }
+    .gd-section-title {
+        font-family: "Google Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-2);
+        letter-spacing: 0.3px;
+    }
+    .gd-sort-btn {
+        height: 32px;
+        padding: 0 12px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--surface);
+        color: var(--text-2);
+        font-size: 13px;
+        font-family: "Google Sans", sans-serif;
+        cursor: pointer;
+        outline: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition:
+            border-color 0.15s,
+            color 0.15s;
+    }
+    .gd-sort-btn:hover {
+        border-color: var(--text-3);
+        color: var(--text);
+    }
+    .gd-new-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 36px;
+        padding: 0 20px;
+        background: var(--blue);
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: "Google Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: var(--sh1);
+        text-decoration: none;
+        transition:
+            background 0.15s,
+            box-shadow 0.15s;
+        white-space: nowrap;
+    }
+    .gd-new-btn:hover {
+        background: var(--blue-dk);
+        box-shadow: var(--sh2);
+    }
+    .gd-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    /* ── Note card ── */
+    .gd-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+        transition:
+            box-shadow 0.2s,
+            border-color 0.2s;
+        animation: cardIn 0.25s ease both;
+    }
+    @keyframes cardIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .gd-card:hover {
+        box-shadow: var(--sh3);
+        border-color: #c5cad0;
+    }
+    .gd-card__stripe {
+        height: 4px;
+        background: var(--stripe-color, var(--blue));
+        flex-shrink: 0;
+    }
+    .gd-card__body {
+        padding: 14px 16px 10px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .gd-card__title {
+        font-family: "Google Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        line-height: 1.4;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .gd-card__content {
+        font-size: 12px;
+        line-height: 1.65;
+        color: var(--text-2);
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .gd-card__footer {
+        padding: 8px 16px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid #f1f3f4;
+        margin-top: 10px;
+    }
+    .gd-card__date {
+        font-size: 11px;
+        color: var(--text-3);
+        letter-spacing: 0.2px;
+    }
+    .gd-card__actions {
+        display: flex;
+        gap: 2px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .gd-card:hover .gd-card__actions {
+        opacity: 1;
+    }
+    .gd-card__act-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-3);
+        transition:
+            background 0.15s,
+            color 0.15s;
+        text-decoration: none;
+    }
+    .gd-card__act-btn:hover {
+        background: var(--blue-lt);
+        color: var(--blue);
+    }
+    .gd-card__act-btn--del:hover {
+        background: #fce8e6;
+        color: var(--red);
+    }
+
+    /* ── Empty state ── */
+    .gd-empty {
+        grid-column: 1/-1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 24px;
+        text-align: center;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    .gd-empty__icon {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 24px;
+        opacity: 0.4;
+    }
+    .gd-empty__title {
+        font-family: "Google Sans", sans-serif;
+        font-size: 18px;
+        color: var(--text-2);
+        margin-bottom: 8px;
+    }
+    .gd-empty__sub {
+        font-size: 13px;
+        color: var(--text-3);
+        margin-bottom: 24px;
+    }
+
+    /* ── Delete modal ── */
+    .gd-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(32, 33, 36, 0.6);
+        backdrop-filter: blur(2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 500;
+        animation: fadeIn 0.15s ease;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    .gd-modal {
+        background: var(--surface);
+        border-radius: 8px;
+        box-shadow: var(--sh3);
+        padding: 28px;
+        width: 100%;
+        max-width: 400px;
+        margin: 16px;
+        animation: modalIn 0.2s cubic-bezier(0.2, 0.8, 0.4, 1);
+    }
+    @keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: scale(0.94);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    .gd-modal__icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--red-lt);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        color: var(--red);
+    }
+    .gd-modal__title {
+        font-family: "Google Sans", sans-serif;
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    .gd-modal__body {
+        font-size: 14px;
+        color: var(--text-2);
+        line-height: 1.6;
+        margin-bottom: 24px;
+    }
+    .gd-modal__body strong {
+        color: var(--text);
+        font-weight: 500;
+    }
+    .gd-modal__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+    .gd-btn {
+        font-family: "Google Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        height: 36px;
+        padding: 0 20px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition:
+            background 0.15s,
+            box-shadow 0.15s;
+    }
+    .gd-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .gd-btn--ghost {
+        background: transparent;
+        color: var(--text-2);
+    }
+    .gd-btn--ghost:hover:not(:disabled) {
+        background: var(--bg);
+    }
+    .gd-btn--danger {
+        background: var(--red);
+        color: #fff;
+        box-shadow: var(--sh1);
+    }
+    .gd-btn--danger:hover:not(:disabled) {
+        background: #c5221f;
+        box-shadow: var(--sh2);
+    }
+
+    /* ── Toast ── */
+    .gd-toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #323232;
+        color: #fff;
+        font-family: "Roboto", sans-serif;
+        font-size: 13px;
+        padding: 10px 20px;
+        border-radius: 4px;
+        box-shadow: var(--sh3);
+        z-index: 600;
+        white-space: nowrap;
+        animation: toastIn 0.25s ease;
+    }
+    @keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translate(-50%, 10px);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+    }
+
+    /* ════════════════════════════════
+     CHAT SIDEBAR
+  ════════════════════════════════ */
+    .chat-sidebar {
+        width: var(--chat-w);
+        background: var(--surface);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        transition:
+            width 0.3s ease,
+            opacity 0.3s ease;
+        overflow: hidden;
+    }
+    .chat-sidebar.collapsed {
+        width: 0;
+        opacity: 0;
+        border-left: none;
+    }
+
+    .chat-header {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+    .chat-header__title {
+        font-family: "Google Sans", sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text);
+    }
+    .chat-header__title .ai-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green);
+        display: inline-block;
+    }
+    .chat-header__actions {
+        display: flex;
+        gap: 4px;
+    }
+    .chat-header__btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-2);
+        transition:
+            background 0.15s,
+            color 0.15s;
+    }
+    .chat-header__btn:hover {
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        scroll-behavior: smooth;
+    }
+
+    /* welcome message */
+    .chat-welcome {
+        text-align: center;
+        padding: 24px 16px;
+        color: var(--text-2);
+    }
+    .chat-welcome__icon {
+        width: 48px;
+        height: 48px;
+        background: var(--blue-lt);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        color: var(--blue);
+    }
+    .chat-welcome__title {
+        font-family: "Google Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: var(--text);
+    }
+    .chat-welcome__sub {
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    /* message bubbles */
+    .chat-msg {
+        display: flex;
+        flex-direction: column;
+        max-width: 90%;
+        animation: msgIn 0.2s ease;
+    }
+    @keyframes msgIn {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .chat-msg--user {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+    .chat-msg--assistant {
+        align-self: flex-start;
+        align-items: flex-start;
+    }
+
+    .chat-msg__bubble {
+        padding: 9px 13px;
+        border-radius: 18px;
+        font-size: 13px;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+    .chat-msg--user .chat-msg__bubble {
+        background: var(--blue);
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+    .chat-msg--assistant .chat-msg__bubble {
+        background: var(--bg);
+        color: var(--text);
+        border-bottom-left-radius: 4px;
+        border: 1px solid var(--border);
+    }
+    .chat-msg__time {
+        font-size: 10px;
+        color: var(--text-3);
+        margin-top: 3px;
+        padding: 0 4px;
+    }
+
+    /* typing indicator */
+    .chat-typing {
+        align-self: flex-start;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        border-bottom-left-radius: 4px;
+        padding: 10px 16px;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+    .chat-typing span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--text-3);
+        animation: bounce 0.9s infinite;
+    }
+    .chat-typing span:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+    .chat-typing span:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+    @keyframes bounce {
+        0%,
+        60%,
+        100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* input area */
+    .chat-input-area {
+        padding: 12px 14px;
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+    }
+    .chat-input-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        border-radius: 24px;
+        padding: 6px 6px 6px 14px;
+        transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
+    }
+    .chat-input-row:focus-within {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+        background: var(--surface);
+    }
+    .chat-input-row textarea {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-family: "Roboto", sans-serif;
+        font-size: 13px;
+        color: var(--text);
+        outline: none;
+        resize: none;
+        max-height: 100px;
+        line-height: 1.5;
+        padding: 3px 0;
+    }
+    .chat-input-row textarea::placeholder {
+        color: var(--text-3);
+    }
+    .chat-send-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        background: var(--blue);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition:
+            background 0.15s,
+            transform 0.1s;
+    }
+    .chat-send-btn:hover:not(:disabled) {
+        background: var(--blue-dk);
+        transform: scale(1.05);
+    }
+    .chat-send-btn:disabled {
+        background: var(--border);
+        cursor: not-allowed;
+    }
+
+    .chat-input-hint {
+        font-size: 11px;
+        color: var(--text-3);
+        text-align: center;
+        margin-top: 6px;
+    }
+
+    /* ── Chat toggle FAB ── */
+    .chat-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--blue);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        box-shadow: var(--sh3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 300;
+        transition:
+            background 0.15s,
+            transform 0.2s,
+            box-shadow 0.15s;
+    }
+    .chat-fab:hover {
+        background: var(--blue-dk);
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+    }
+    .chat-fab.active {
+        background: var(--text-2);
+    }
+
+    @media (max-width: 768px) {
+        .chat-sidebar {
+            position: fixed;
+            right: 0;
+            top: var(--nav-h);
+            bottom: 0;
+            z-index: 400;
+            box-shadow: var(--sh3);
+        }
+        .chat-sidebar.collapsed {
+            width: 0;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .gd-nav {
+            padding: 0 12px;
+        }
+        .gd-nav__brand-name {
+            display: none;
+        }
+        .gd-main {
+            padding: 20px 12px 80px;
+        }
+        .gd-grid {
+            grid-template-columns: 1fr;
+        }
+        .chat-sidebar {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %} {% block content %}
+<meta name="csrf-token" content="{{ csrf_token }}" />
+
+<div id="app" v-cloak>
+    <!-- TOP NAV -->
+    <header class="gd-nav">
+        <a href="{% url 'notes' %}" class="gd-nav__brand">
+            <svg
+                class="gd-nav__brand-icon"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    d="M28 4H10C7.8 4 6 5.8 6 8v32c0 2.2 1.8 4 4 4h28c2.2 0 4-1.8 4-4V18L28 4z"
+                    fill="#4285f4"
+                />
+                <path d="M28 4v14h14L28 4z" fill="#a8c7fa" />
+                <rect x="13" y="22" width="22" height="2" rx="1" fill="white" />
+                <rect x="13" y="27" width="22" height="2" rx="1" fill="white" />
+                <rect x="13" y="32" width="14" height="2" rx="1" fill="white" />
+            </svg>
+            <span class="gd-nav__brand-name">Note<span>craft</span></span>
+        </a>
+
+        <div class="gd-nav__search">
+            <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+                v-model="search"
+                type="search"
+                placeholder="Search in notes"
+            />
+        </div>
+
+        <div class="gd-nav__right">
+            <select v-model="sortBy" class="gd-sort-btn" title="Sort notes">
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="title">Title A–Z</option>
+            </select>
+            <a href="{% url 'create_note' %}" class="gd-new-btn">
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                New note
+            </a>
+        </div>
+    </header>
+
+    <!-- PAGE LAYOUT -->
+    <div class="gd-layout">
+        <!-- NOTES CONTENT -->
+        <div class="gd-content">
+            <main class="gd-main">
+                <div class="gd-section-header">
+                    <span class="gd-section-title">
+                        <template v-if="search.trim()">
+                            [[ filtered.length ]] result[[ filtered.length !== 1
+                            ? 's' : '' ]] for "[[ search ]]"
+                        </template>
+                        <template v-else>
+                            [[ filtered.length ]] note[[ filtered.length !== 1 ?
+                            's' : '' ]]
+                        </template>
+                    </span>
+                </div>
+
+                <div class="gd-grid">
+                    <div v-if="filtered.length === 0" class="gd-empty">
+                        <svg
+                            class="gd-empty__icon"
+                            viewBox="0 0 80 80"
+                            fill="none"
+                        >
+                            <rect
+                                x="12"
+                                y="8"
+                                width="44"
+                                height="56"
+                                rx="4"
+                                fill="#dadce0"
+                            />
+                            <rect
+                                x="20"
+                                y="22"
+                                width="28"
+                                height="3"
+                                rx="1.5"
+                                fill="#9aa0a6"
+                            />
+                            <rect
+                                x="20"
+                                y="30"
+                                width="20"
+                                height="3"
+                                rx="1.5"
+                                fill="#9aa0a6"
+                            />
+                            <rect
+                                x="20"
+                                y="38"
+                                width="24"
+                                height="3"
+                                rx="1.5"
+                                fill="#9aa0a6"
+                            />
+                            <circle cx="56" cy="56" r="16" fill="#e8f0fe" />
+                            <path
+                                d="M48 56h16M56 48v16"
+                                stroke="#1a73e8"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                        <p class="gd-empty__title">
+                            <template v-if="search.trim()"
+                                >No notes found</template
+                            >
+                            <template v-else>No notes yet</template>
+                        </p>
+                        <p class="gd-empty__sub">
+                            <template v-if="search.trim()"
+                                >Try a different search term</template
+                            >
+                            <template v-else
+                                >Create your first note to get started</template
+                            >
+                        </p>
+                        <a
+                            v-if="!search.trim()"
+                            href="{% url 'create_note' %}"
+                            class="gd-new-btn"
+                        >
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            Create note
+                        </a>
+                    </div>
+
+                    <div
+                        v-for="(note, i) in filtered"
+                        :key="note.id"
+                        class="gd-card"
+                        :style="{ animationDelay: (i * 0.04) + 's', '--stripe-color': stripeColor(i) }"
+                        @click="window.location = `/notes/edit/${note.id}/`"
+                    >
+                        <div class="gd-card__stripe"></div>
+                        <div class="gd-card__body">
+                            <h3 class="gd-card__title">[[ note.title ]]</h3>
+                            <p class="gd-card__content">
+                                [[ stripHtml(note.content) ]]
+                            </p>
+                        </div>
+                        <div class="gd-card__footer">
+                            <span class="gd-card__date"
+                                >[[ formatDate(note.created_at) ]]</span
+                            >
+                            <div class="gd-card__actions">
+                                <a
+                                    :href="`/notes/edit/${note.id}/`"
+                                    @click.stop
+                                    class="gd-card__act-btn"
+                                    title="Edit"
+                                >
+                                    <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    >
+                                        <path
+                                            d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                                        />
+                                        <path
+                                            d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                                        />
+                                    </svg>
+                                </a>
+                                <button
+                                    @click.stop="confirmDelete(note)"
+                                    class="gd-card__act-btn gd-card__act-btn--del"
+                                    title="Delete"
+                                >
+                                    <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    >
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path
+                                            d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                                        />
+                                        <path d="M10 11v6M14 11v6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- ════════════════════════════
+         CHAT SIDEBAR
+    ════════════════════════════ -->
+        <aside class="chat-sidebar" :class="{ collapsed: !chatOpen }">
+            <!-- Header -->
+            <div class="chat-header">
+                <div class="chat-header__title">
+                    <span class="ai-dot"></span>
+                    Ask your notes
+                </div>
+                <div class="chat-header__actions">
+                    <!-- Clear chat -->
+                    <button
+                        @click="clearChat"
+                        class="chat-header__btn"
+                        title="Clear chat"
+                    >
+                        <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path
+                                d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                            />
+                        </svg>
+                    </button>
+                    <!-- Close -->
+                    <button
+                        @click="chatOpen = false"
+                        class="chat-header__btn"
+                        title="Close"
+                    >
+                        <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="chat-messages" ref="msgContainer">
+                <!-- Welcome screen when empty -->
+                <div v-if="chatMessages.length === 0" class="chat-welcome">
+                    <div class="chat-welcome__icon">
+                        <svg
+                            width="22"
+                            height="22"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4M12 8h.01" />
+                        </svg>
+                    </div>
+                    <p class="chat-welcome__title">
+                        Ask anything about your notes
+                    </p>
+                    <p class="chat-welcome__sub">
+                        I'll search through your notes and answer based on what
+                        I find.
+                    </p>
+                </div>
+
+                <!-- Message bubbles -->
+                <div
+                    v-for="msg in chatMessages"
+                    :key="msg.id"
+                    class="chat-msg"
+                    :class="`chat-msg--${msg.role}`"
+                >
+                    <div class="chat-msg__bubble">[[ msg.content ]]</div>
+                    <span class="chat-msg__time">[[ msg.time ]]</span>
+                </div>
+
+                <!-- Typing indicator -->
+                <div v-if="chatLoading" class="chat-typing">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="chat-input-area">
+                <div class="chat-input-row">
+                    <textarea
+                        v-model="chatInput"
+                        ref="chatTextarea"
+                        placeholder="Ask about your notes…"
+                        rows="1"
+                        @keydown.enter.exact.prevent="sendMessage"
+                        @input="autoResize"
+                    ></textarea>
+                    <button
+                        class="chat-send-btn"
+                        :disabled="!chatInput.trim() || chatLoading"
+                        @click="sendMessage"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                        >
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                        </svg>
+                    </button>
+                </div>
+                <p class="chat-input-hint">
+                    Enter to send · Shift+Enter for new line
+                </p>
+            </div>
+        </aside>
+    </div>
+    <!-- /layout -->
+
+    <!-- CHAT FAB -->
+    <button
+        class="chat-fab"
+        :class="{ active: chatOpen }"
+        @click="chatOpen = !chatOpen"
+        title="Ask your notes"
+    >
+        <svg
+            v-if="!chatOpen"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+        >
+            <path
+                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+            />
+        </svg>
+        <svg
+            v-else
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+        >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+    </button>
+
+    <!-- DELETE MODAL -->
+    <div
+        v-if="deleteTarget"
+        class="gd-overlay"
+        @click.self="deleteTarget = null"
+    >
+        <div class="gd-modal">
+            <div class="gd-modal__icon">
+                <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <path d="M10 11v6M14 11v6" />
+                </svg>
+            </div>
+            <h3 class="gd-modal__title">Move to trash?</h3>
+            <p class="gd-modal__body">
+                "<strong>[[ deleteTarget.title ]]</strong>" will be permanently
+                deleted.
+            </p>
+            <div class="gd-modal__actions">
+                <button
+                    @click="deleteTarget = null"
+                    class="gd-btn gd-btn--ghost"
+                >
+                    Cancel
+                </button>
+                <button
+                    @click="deleteNote"
+                    :disabled="deleting"
+                    class="gd-btn gd-btn--danger"
+                >
+                    <svg
+                        v-if="deleting"
+                        class="spin"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                    >
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    [[ deleting ? 'Deleting…' : 'Delete note' ]]
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div v-if="toast" class="gd-toast">[[ toast ]]</div>
+</div>
+{% endblock %} {% block js %}
+<script>
+    const { createApp, ref, computed, nextTick } = Vue;
+
+    createApp({
+        delimiters: ["[[", "]]"],
+
+        setup() {
+            const raw = JSON.parse(document.getElementById("data").textContent);
+            const notes = ref(raw.notes || []);
+
+            const search = ref("");
+            const sortBy = ref("newest");
+            const deleteTarget = ref(null);
+            const deleting = ref(false);
+            const toast = ref("");
+
+            // ── Chat state ──
+            const chatOpen = ref(false);
+            const chatInput = ref("");
+            const chatMessages = ref([]);
+            const chatLoading = ref(false);
+            const msgContainer = ref(null);
+            const chatTextarea = ref(null);
+
+            const csrf = document.querySelector(
+                'meta[name="csrf-token"]',
+            ).content;
+
+            // ── Notes computed ──
+            const filtered = computed(() => {
+                let result = notes.value;
+                if (search.value.trim()) {
+                    const q = search.value.toLowerCase();
+                    result = result.filter(
+                        (n) =>
+                            n.title.toLowerCase().includes(q) ||
+                            n.content.toLowerCase().includes(q),
+                    );
+                }
+                return [...result].sort((a, b) => {
+                    if (sortBy.value === "newest")
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    if (sortBy.value === "oldest")
+                        return new Date(a.created_at) - new Date(b.created_at);
+                    if (sortBy.value === "title")
+                        return a.title.localeCompare(b.title);
+                    return 0;
+                });
+            });
+
+            // ── Notes methods ──
+            function formatDate(str) {
+                return new Date(str).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                });
+            }
+            function stripHtml(html) {
+                if (!html) return "";
+                return html
+                    .replace(/<[^>]+>/g, " ")
+                    .replace(/\s+/g, " ")
+                    .trim();
+            }
+            const STRIPES = [
+                "#4285f4",
+                "#34a853",
+                "#fbbc04",
+                "#ea4335",
+                "#1a73e8",
+                "#0f9d58",
+            ];
+            function stripeColor(i) {
+                return STRIPES[i % STRIPES.length];
+            }
+            function confirmDelete(note) {
+                deleteTarget.value = note;
+            }
+
+            async function deleteNote() {
+                if (!deleteTarget.value) return;
+                deleting.value = true;
+                const id = deleteTarget.value.id;
+                const backup = [...notes.value];
+                notes.value = notes.value.filter((n) => n.id !== id);
+                deleteTarget.value = null;
+                try {
+                    const res = await fetch(`/notes/${id}/delete/`, {
+                        method: "POST",
+                        headers: { "X-CSRFToken": csrf },
+                    });
+                    if (!res.ok) throw new Error();
+                    showToast("Note deleted");
+                } catch {
+                    notes.value = backup;
+                    showToast("Could not delete note");
+                } finally {
+                    deleting.value = false;
+                }
+            }
+
+            function showToast(msg) {
+                toast.value = msg;
+                setTimeout(() => (toast.value = ""), 2500);
+            }
+
+            // ── Chat methods ──
+            function nowTime() {
+                return new Date().toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+            }
+
+            async function sendMessage() {
+                const text = chatInput.value.trim();
+                if (!text || chatLoading.value) return;
+
+                // Add user message
+                chatMessages.value.push({
+                    id: Date.now(),
+                    role: "user",
+                    content: text,
+                    time: nowTime(),
+                });
+                chatInput.value = "";
+                chatLoading.value = true;
+
+                // Reset textarea height
+                if (chatTextarea.value)
+                    chatTextarea.value.style.height = "auto";
+
+                await scrollToBottom();
+
+                try {
+                    const res = await fetch("ai/chat/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": csrf,
+                        },
+                        body: JSON.stringify({ message: text }),
+                    });
+                    const data = await res.json();
+                    chatMessages.value.push({
+                        id: Date.now() + 1,
+                        role: "assistant",
+                        content:
+                            data.answer ||
+                            data.message ||
+                            "Sorry, I couldn't get a response.",
+                        time: nowTime(),
+                    });
+                } catch {
+                    chatMessages.value.push({
+                        id: Date.now() + 1,
+                        role: "assistant",
+                        content: "Something went wrong. Please try again.",
+                        time: nowTime(),
+                    });
+                } finally {
+                    chatLoading.value = false;
+                    await scrollToBottom();
+                }
+            }
+
+            async function clearChat() {
+                try {
+                    await fetch("/api/chat/clear/", {
+                        headers: { "X-CSRFToken": csrf },
+                    });
+                } catch {}
+                chatMessages.value = [];
+            }
+
+            async function scrollToBottom() {
+                await nextTick();
+                if (msgContainer.value) {
+                    msgContainer.value.scrollTop =
+                        msgContainer.value.scrollHeight;
+                }
+            }
+
+            function autoResize(e) {
+                e.target.style.height = "auto";
+                e.target.style.height =
+                    Math.min(e.target.scrollHeight, 100) + "px";
+            }
+
+            return {
+                notes,
+                search,
+                sortBy,
+                filtered,
+                deleteTarget,
+                deleting,
+                toast,
+                window,
+                formatDate,
+                stripHtml,
+                stripeColor,
+                confirmDelete,
+                deleteNote,
+                showToast,
+                chatOpen,
+                chatInput,
+                chatMessages,
+                chatLoading,
+                msgContainer,
+                chatTextarea,
+                sendMessage,
+                clearChat,
+                autoResize,
+            };
+        },
+    }).mount("#app");
+</script>
+
+<style>
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    .spin {
+        animation: spin 0.8s linear infinite;
+    }
+</style>
+{% endblock %}

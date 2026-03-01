@@ -1,6 +1,4 @@
-{% extends 'base.html' %} 
-{% block title %}Home{% endblock %} 
-{% block content%} 
+{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block content%}
 <div id="app">[[ data.message ]]</div>
 {% endblock %} {% block js %}
 <script>
@@ -10,9 +8,7 @@
         delimiters: ["[[", "]]"],
         data() {
             return {
-                data: JSON.parse(
-                    document.getElementById("test-data").textContent,
-                ),
+                data: JSON.parse(document.getElementById("data").textContent),
             };
         },
     }).mount("#app");
