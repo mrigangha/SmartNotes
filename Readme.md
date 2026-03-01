@@ -195,62 +195,9 @@ Client Request
 
 ---
 
-## Project Structure
-
-project/
-│
-├── app/
-│   ├── models.py
-│   ├── views.py
-│   ├── services/
-│   │   ├── rag.py
-│   │   ├── redis_client.py
-│   ├── urls.py
-│
-├── templates/
-│   ├── base.html
-│   ├── dashboard.html
-│
-├── static/
-│   ├── js/
-│
-├── manage.py
-├── requirements.txt
-└── README.md
-
----
-
 ## How to Run
 
-1. Clone repository
-
-git clone https://github.com/yourusername/djanvue.git  
-cd djanvue  
-
-2. Create virtual environment
-
-python -m venv venv  
-source venv/bin/activate   (Windows: venv\Scripts\activate)  
-
-3. Install dependencies
-
-pip install -r requirements.txt  
-
-4. Run migrations
-
-python manage.py migrate  
-
-5. Start Redis server
-
-redis-server  
-
-6. Start development server
-
-python manage.py runserver  
-
-Open in browser:
-
-http://127.0.0.1:8000/
+For now the project is not organished but is easy to run.
 
 ---
 
