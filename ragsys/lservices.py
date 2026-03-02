@@ -21,7 +21,7 @@ client = OpenAI(
     api_key=HF_TOKEN,
 )
 
-# Try these in order if one fails
+
 FALLBACK_MODELS = [
     "meta-llama/Llama-3.3-70B-Instruct:cheapest",
     "Qwen/Qwen2.5-72B-Instruct:cheapest",
@@ -32,9 +32,6 @@ MODEL_ID = FALLBACK_MODELS[0]
 TTL = getattr(settings, "EMBEDDING_CACHE_TTL", 86400)
 
 
-# =========================
-# EMBEDDING WITH REDIS CACHE
-# =========================
 def get_embedding(note_id: int, text: str) -> list:
     """Get embedding from Redis cache, compute if not cached."""
     cache_key = f"embedding:note:{note_id}"
@@ -56,9 +53,6 @@ def encode_text(text: str) -> list:
     return embedding_model.encode([text])[0].tolist()
 
 
-# =========================
-# BUILD FAISS INDEX
-# =========================
 def build_index(notes):
     """Build in-memory FAISS index from notes, using Redis cached embeddings."""
     if not notes:
@@ -77,9 +71,6 @@ def build_index(notes):
     return index, texts
 
 
-# =========================
-# RETRIEVAL
-# =========================
 def retrieve(query: str, user, k: int = 3) -> list:
     """Find top-k relevant notes for this user."""
     from .models import Note
@@ -97,9 +88,6 @@ def retrieve(query: str, user, k: int = 3) -> list:
     return [texts[i] for i in indices[0] if i < len(texts)]
 
 
-# =========================
-# GENERATION
-# =========================
 def generate(context: str, query: str, history: list) -> str:
     """Call HuggingFace LLM with context and chat history."""
     messages = [
@@ -145,9 +133,6 @@ def generate(context: str, query: str, history: list) -> str:
     return "All models failed or are deprecated. Please check huggingface.co for available models."
 
 
-# =========================
-# FULL RAG PIPELINE
-# =========================
 def ask(query: str, user, history: list) -> str:
     docs = retrieve(query, user)
     if not docs:

@@ -62,7 +62,7 @@ This ensures:
 Instead of building a full SPA, Smart Notes uses:
 
 1. Server-Side Rendering with Django Templates  
-2. Mounted Vue components for interactivity  
+2. Mounted Vue components for interactivity   (Similar to hydration but without node.)
 
 Only specific UI sections become reactive.
 

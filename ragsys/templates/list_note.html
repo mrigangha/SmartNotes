@@ -45,7 +45,6 @@
         display: none;
     }
 
-    /* ── Top Nav ── */
     .gd-nav {
         position: sticky;
         top: 0;
@@ -147,7 +146,6 @@
         color: var(--blue);
     }
 
-    /* ── Page layout with chat sidebar ── */
     .gd-layout {
         display: flex;
         height: calc(100vh - var(--nav-h));
@@ -160,7 +158,6 @@
         transition: margin-right 0.3s ease;
     }
 
-    /* ── Main ── */
     .gd-main {
         max-width: 1200px;
         margin: 0 auto;
@@ -233,7 +230,6 @@
         gap: 16px;
     }
 
-    /* ── Note card ── */
     .gd-card {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -342,7 +338,6 @@
         color: var(--red);
     }
 
-    /* ── Empty state ── */
     .gd-empty {
         grid-column: 1/-1;
         display: flex;
@@ -373,7 +368,6 @@
         margin-bottom: 24px;
     }
 
-    /* ── Delete modal ── */
     .gd-overlay {
         position: fixed;
         inset: 0;
@@ -482,7 +476,6 @@
         box-shadow: var(--sh2);
     }
 
-    /* ── Toast ── */
     .gd-toast {
         position: fixed;
         bottom: 24px;
@@ -510,9 +503,6 @@
         }
     }
 
-    /* ════════════════════════════════
-     CHAT SIDEBAR
-  ════════════════════════════════ */
     .chat-sidebar {
         width: var(--chat-w);
         background: var(--surface);
@@ -589,7 +579,6 @@
         scroll-behavior: smooth;
     }
 
-    /* welcome message */
     .chat-welcome {
         text-align: center;
         padding: 24px 16px;
@@ -618,7 +607,6 @@
         line-height: 1.6;
     }
 
-    /* message bubbles */
     .chat-msg {
         display: flex;
         flex-direction: column;
@@ -670,7 +658,6 @@
         padding: 0 4px;
     }
 
-    /* typing indicator */
     .chat-typing {
         align-self: flex-start;
         background: var(--bg);
@@ -706,7 +693,6 @@
         }
     }
 
-    /* input area */
     .chat-input-area {
         padding: 12px 14px;
         border-top: 1px solid var(--border);
@@ -777,7 +763,6 @@
         margin-top: 6px;
     }
 
-    /* ── Chat toggle FAB ── */
     .chat-fab {
         position: fixed;
         bottom: 24px;
@@ -844,7 +829,6 @@
 <meta name="csrf-token" content="{{ csrf_token }}" />
 
 <div id="app" v-cloak>
-    <!-- TOP NAV -->
     <header class="gd-nav">
         <a href="{% url 'notes' %}" class="gd-nav__brand">
             <svg
@@ -907,9 +891,7 @@
         </div>
     </header>
 
-    <!-- PAGE LAYOUT -->
     <div class="gd-layout">
-        <!-- NOTES CONTENT -->
         <div class="gd-content">
             <main class="gd-main">
                 <div class="gd-section-header">
@@ -986,7 +968,7 @@
                                 >Create your first note to get started</template
                             >
                         </p>
-                        <a
+                        
                             v-if="!search.trim()"
                             href="{% url 'create_note' %}"
                             class="gd-new-btn"
@@ -1026,7 +1008,7 @@
                                 >[[ formatDate(note.created_at) ]]</span
                             >
                             <div class="gd-card__actions">
-                                <a
+                                
                                     :href="`/notes/edit/${note.id}/`"
                                     @click.stop
                                     class="gd-card__act-btn"
@@ -1077,18 +1059,13 @@
             </main>
         </div>
 
-        <!-- ════════════════════════════
-         CHAT SIDEBAR
-    ════════════════════════════ -->
         <aside class="chat-sidebar" :class="{ collapsed: !chatOpen }">
-            <!-- Header -->
             <div class="chat-header">
                 <div class="chat-header__title">
                     <span class="ai-dot"></span>
                     Ask your notes
                 </div>
                 <div class="chat-header__actions">
-                    <!-- Clear chat -->
                     <button
                         @click="clearChat"
                         class="chat-header__btn"
@@ -1109,7 +1086,6 @@
                             />
                         </svg>
                     </button>
-                    <!-- Close -->
                     <button
                         @click="chatOpen = false"
                         class="chat-header__btn"
@@ -1131,9 +1107,7 @@
                 </div>
             </div>
 
-            <!-- Messages -->
             <div class="chat-messages" ref="msgContainer">
-                <!-- Welcome screen when empty -->
                 <div v-if="chatMessages.length === 0" class="chat-welcome">
                     <div class="chat-welcome__icon">
                         <svg
@@ -1158,7 +1132,6 @@
                     </p>
                 </div>
 
-                <!-- Message bubbles -->
                 <div
                     v-for="msg in chatMessages"
                     :key="msg.id"
@@ -1169,13 +1142,11 @@
                     <span class="chat-msg__time">[[ msg.time ]]</span>
                 </div>
 
-                <!-- Typing indicator -->
                 <div v-if="chatLoading" class="chat-typing">
                     <span></span><span></span><span></span>
                 </div>
             </div>
 
-            <!-- Input -->
             <div class="chat-input-area">
                 <div class="chat-input-row">
                     <textarea
@@ -1211,9 +1182,7 @@
             </div>
         </aside>
     </div>
-    <!-- /layout -->
 
-    <!-- CHAT FAB -->
     <button
         class="chat-fab"
         :class="{ active: chatOpen }"
@@ -1249,7 +1218,6 @@
         </svg>
     </button>
 
-    <!-- DELETE MODAL -->
     <div
         v-if="deleteTarget"
         class="gd-overlay"
@@ -1306,7 +1274,6 @@
         </div>
     </div>
 
-    <!-- TOAST -->
     <div v-if="toast" class="gd-toast">[[ toast ]]</div>
 </div>
 {% endblock %} {% block js %}
@@ -1326,7 +1293,6 @@
             const deleting = ref(false);
             const toast = ref("");
 
-            // ── Chat state ──
             const chatOpen = ref(false);
             const chatInput = ref("");
             const chatMessages = ref([]);
@@ -1338,7 +1304,6 @@
                 'meta[name="csrf-token"]',
             ).content;
 
-            // ── Notes computed ──
             const filtered = computed(() => {
                 let result = notes.value;
                 if (search.value.trim()) {
@@ -1360,7 +1325,6 @@
                 });
             });
 
-            // ── Notes methods ──
             function formatDate(str) {
                 return new Date(str).toLocaleDateString("en-US", {
                     month: "short",
@@ -1417,7 +1381,6 @@
                 setTimeout(() => (toast.value = ""), 2500);
             }
 
-            // ── Chat methods ──
             function nowTime() {
                 return new Date().toLocaleTimeString("en-US", {
                     hour: "2-digit",
@@ -1429,7 +1392,6 @@
                 const text = chatInput.value.trim();
                 if (!text || chatLoading.value) return;
 
-                // Add user message
                 chatMessages.value.push({
                     id: Date.now(),
                     role: "user",
@@ -1439,7 +1401,6 @@
                 chatInput.value = "";
                 chatLoading.value = true;
 
-                // Reset textarea height
                 if (chatTextarea.value)
                     chatTextarea.value.style.height = "auto";
 
